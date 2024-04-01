@@ -3,13 +3,20 @@ package org.example.gradpathway.service;
 import org.example.gradpathway.DTO.JobPostDTO;
 import org.example.gradpathway.entity.Company;
 import org.example.gradpathway.entity.JobPost;
+import org.example.gradpathway.entity.User;
 import org.example.gradpathway.repository.CompanyRepository;
 import org.example.gradpathway.repository.JobsRepository;
+import org.example.gradpathway.repository.UserRepository;
+import org.example.gradpathway.util.AuthenticationDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class JobServiceImpl implements JobService{
@@ -18,16 +25,26 @@ public class JobServiceImpl implements JobService{
 
     private final CompanyRepository companyRepository;
 
+    private final AuthenticationDetails authenticationDetails;
+
     @Autowired
-    public JobServiceImpl(JobsRepository jobsRepository, CompanyRepository companyRepository) {
+    public JobServiceImpl(JobsRepository jobsRepository, CompanyRepository companyRepository,AuthenticationDetails authenticationDetails) {
         this.jobsRepository = jobsRepository;
         this.companyRepository = companyRepository;
+        this.authenticationDetails = authenticationDetails;
     }
 
     @Override
     public void addJob(JobPostDTO jobDTO) {
 
         Company company = companyRepository.findById(jobDTO.getCompanyId()).orElse(null);
+
+
+        Optional<User> user = authenticationDetails.getUser();
+
+        if(company == null || user.isEmpty()){
+            throw new IllegalArgumentException("Unknown company or user");
+        }
 
         JobPost jobPost = JobPost.builder()
                 .id(0)
@@ -40,7 +57,7 @@ public class JobServiceImpl implements JobService{
                 .visaSponsorship(jobDTO.isVisaSponsorship())
                 .postedAt(new Date())
                 .company(company)
-                .user(null)
+                .user(user.get())
                 .build();
         jobsRepository.save(jobPost);
     }

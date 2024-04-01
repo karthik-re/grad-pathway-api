@@ -3,13 +3,20 @@ package org.example.gradpathway.service;
 import org.example.gradpathway.DTO.ReviewDTO;
 import org.example.gradpathway.entity.Company;
 import org.example.gradpathway.entity.Reviews;
+import org.example.gradpathway.entity.User;
 import org.example.gradpathway.repository.CompanyRepository;
 import org.example.gradpathway.repository.ReviewsRepository;
+import org.example.gradpathway.repository.UserRepository;
+import org.example.gradpathway.util.AuthenticationDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReviewsServiceImpl implements ReviewsService{
@@ -18,27 +25,36 @@ public class ReviewsServiceImpl implements ReviewsService{
 
     private final CompanyRepository companyRepository;
 
+    private final AuthenticationDetails authenticationDetails;
+
     @Autowired
-    public ReviewsServiceImpl(ReviewsRepository reviewsRepository, CompanyRepository companyRepository) {
+    public ReviewsServiceImpl(ReviewsRepository reviewsRepository,
+                              CompanyRepository companyRepository,AuthenticationDetails authenticationDetails) {
         this.reviewsRepository = reviewsRepository;
         this.companyRepository = companyRepository;
+        this.authenticationDetails = authenticationDetails;
+
     }
     @Override
     public void addReview(ReviewDTO reviewDTO) {
         Company company = companyRepository.findById(reviewDTO.getCompanyId()).orElse(null);
-        if(company != null){
+
+        Optional<User> user = authenticationDetails.getUser();
+
+        if(company == null || user.isEmpty()){
+            throw new IllegalArgumentException("Unknown company or user");
+        }
             Reviews review = Reviews.builder()
                     .id(0)
                     .title(reviewDTO.getTitle())
                     .description(reviewDTO.getDescription())
                     .rating(reviewDTO.getRating())
                     .company(company)
-                    .user(null)
+                    .user(user.get())
                     .postedAt(new Date())
                     .build();
 
             reviewsRepository.save(review);
-        }
     }
 
     @Override

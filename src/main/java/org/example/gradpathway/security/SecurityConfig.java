@@ -29,6 +29,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/all","/api/auth/delete/**").hasAuthority("ADMIN")
                                 .requestMatchers("/api/auth/user/**","/api/userdata/**").authenticated()
                                 .requestMatchers(HttpMethod.DELETE,"/api/userdata/**").hasAuthority("ADMIN")
+                                .anyRequest().permitAll()
                 )
                 .formLogin(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
