@@ -45,6 +45,10 @@ public class UserDataServiceImpl implements UserDataService{
 
     @Override
     public void updateUserData(UserDataDTO userDataDTO,int id) {
+        Optional<User> user = authenticationDetails.getUser();
+        if(user.isPresent() && !user.get().getRole().equals("ADMIN") && user.get().getId() != id){
+            throw new IllegalArgumentException("Unauthorized");
+        }
         UserData userData = userDataRepository.findById(id).orElse(null);
         if(userData != null){
             userData.setMobile(userDataDTO.getMobile());
@@ -56,12 +60,16 @@ public class UserDataServiceImpl implements UserDataService{
 
     @Override
     public UserData getUserDataByUserId(int id) {
-
+        Optional<User> user = authenticationDetails.getUser();
+        if(user.isPresent() && !user.get().getRole().equals("ADMIN") && user.get().getId() != id){
+            throw new IllegalArgumentException("Unauthorized");
+        }
         return userDataRepository.findByUserId(id);
     }
 
     @Override
     public void deleteUserData(int id) {
+        userDataRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User data not found"));
         userDataRepository.deleteById(id);
     }
 }

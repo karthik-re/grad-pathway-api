@@ -1,5 +1,6 @@
 package org.example.gradpathway.controller;
 
+import jakarta.validation.Valid;
 import org.example.gradpathway.DTO.CompanyDTO;
 import org.example.gradpathway.entity.Company;
 import org.example.gradpathway.service.CompanyService;
@@ -9,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -29,26 +29,43 @@ public class CompanyController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addCompany(@RequestBody CompanyDTO company) {
+    public ResponseEntity<String> addCompany(@Valid @RequestBody CompanyDTO company) {
+        if(companyService.existsByName(company.getName())) {
+            return ResponseEntity.badRequest().body("Company already exists");
+        }
         companyService.addCompany(company);
         return ResponseEntity.ok("Company added successfully");
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteCompany(int id) {
-        companyService.deleteCompany(id);
-        return ResponseEntity.ok("Company deleted successfully");
+        try{
+            companyService.deleteCompany(id);
+            return ResponseEntity.ok("Company deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/company/{id}")
-    public ResponseEntity<Company> getCompanyById(@PathVariable int id) {
-        return ResponseEntity.ok(companyService.getCompanyById(id));
+    public ResponseEntity<?> getCompanyById(@PathVariable int id) {
+        Company company;
+        try {
+            company = companyService.getCompanyById(id);
+            return ResponseEntity.ok(company);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateCompany(@RequestBody CompanyDTO company, @PathVariable int id) {
-        companyService.updateCompany(company, id);
-        return ResponseEntity.ok("Company updated successfully");
+    public ResponseEntity<String> updateCompany(@Valid @RequestBody CompanyDTO company, @PathVariable int id) {
+        try{
+            companyService.updateCompany(company, id);
+            return ResponseEntity.ok("Company updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/company/name")
@@ -68,20 +85,26 @@ public class CompanyController {
 
     @PostMapping("/image/")
     public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file
-            , @RequestParam("id") int id) throws IOException
+            , @RequestParam("id") int id)
     {
-        companyService.uploadImage(file, id);
-        return ResponseEntity.ok("Image uploaded successfully");
+        try {
+            String s = companyService.uploadImage(file, id);
+            return ResponseEntity.ok(s);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/image/{id}")
-    public ResponseEntity<?> getImage(@PathVariable int id) throws IOException {
-        byte[] image = companyService.getImage(id);
-        return ResponseEntity.status(200)
-                .contentType(MediaType.valueOf("image/png"))
-                .body(image);
+    public ResponseEntity<?> getImage(@PathVariable int id) {
+        try {
+            byte[] image = companyService.getImage(id);
+            return ResponseEntity.status(200)
+                    .contentType(MediaType.valueOf("image/png"))
+                    .body(image);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-
-
 
 }

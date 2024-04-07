@@ -21,7 +21,6 @@ public class AuthenticationDetails {
     }
     public Optional<User> getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userRepository.findByEmail(userDetails.getUsername());
+        return userRepository.findByEmail(authentication.getName());
     }
 }

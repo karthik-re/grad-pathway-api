@@ -1,6 +1,9 @@
 package org.example.gradpathway.controller;
 
+import jakarta.validation.Valid;
 import org.example.gradpathway.DTO.RegisterDTO;
+import org.example.gradpathway.DTO.UserResDTO;
+import org.example.gradpathway.entity.User;
 import org.example.gradpathway.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDTO registerDTO) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterDTO registerDTO) {
         if(userService.userExists(registerDTO.getEmail())) {
             return ResponseEntity.badRequest().body("User already exists");
         }
@@ -26,16 +29,14 @@ public class AuthController {
         return ResponseEntity.ok("New User Registered");
     }
 
-    //implement login logic
-//    @GetMapping("/login")
-//    public ResponseEntity<String> login() {
-//        return ResponseEntity.ok("User Logged In");
-//    }
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
-        return ResponseEntity.ok("User Deleted");
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok("User Deleted");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/all")
@@ -45,6 +46,13 @@ public class AuthController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUserById(@PathVariable int id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+        UserResDTO user;
+        try {
+            user = userService.getUserById(id);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 }
