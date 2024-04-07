@@ -1,7 +1,7 @@
 package org.example.gradpathway.service;
 
 import org.example.gradpathway.DTO.ReviewDTO;
-import org.example.gradpathway.entity.Reviews;
+import org.example.gradpathway.DTO.ReviewResDTO;
 
 import java.util.List;
 
@@ -13,11 +13,11 @@ public interface ReviewsService {
 
     void deleteReview(int id);
 
-    List<Reviews> getAllReviews();
+    List<ReviewResDTO> getAllReviews();
 
-    Reviews getReviewById(int id);
+    ReviewResDTO getReviewById(int id);
 
-    List<Reviews> getReviewsByCompanyId(int companyId);
+    List<ReviewResDTO> getReviewsByCompanyId(int companyId);
 
-    List<Reviews> getReviewsByCompanyIdOrderBy(int companyId, String order);
+    List<ReviewResDTO> getReviewsByCompanyIdOrderBy(int companyId, String order);
 }

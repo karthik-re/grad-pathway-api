@@ -28,5 +28,6 @@ public interface CompanyService {
 
     byte[] getImage(int id) throws IOException;
 
+    boolean existsByName(String name);
 
 }

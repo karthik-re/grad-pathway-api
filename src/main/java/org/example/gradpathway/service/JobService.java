@@ -1,7 +1,7 @@
 package org.example.gradpathway.service;
 
 import org.example.gradpathway.DTO.JobPostDTO;
-import org.example.gradpathway.entity.JobPost;
+import org.example.gradpathway.DTO.JobPostResDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -14,21 +14,21 @@ public interface JobService {
 
     void deleteJob(int id);
 
-    List<JobPost> getAllJobs();
+    List<JobPostResDTO> getAllJobs();
 
-    JobPost getJobById(int id);
+    JobPostResDTO getJobById(int id);
 
-    List<JobPost> getJobsByTitle(String title);
+    List<JobPostResDTO> getJobsByTitle(String title);
 
-    List<JobPost> getJobsByLocation(String location);
+    List<JobPostResDTO> getJobsByLocation(String location);
 
-    List<JobPost> getJobsByType(String type);
+    List<JobPostResDTO> getJobsByType(String type);
 
-    List<JobPost> getJobsByExperience(int experience);
+    List<JobPostResDTO> getJobsByExperience(int experience);
 
-    List<JobPost> getJobsBySalary(int salary);
+    List<JobPostResDTO> getJobsBySalary(int salary);
 
-    List<JobPost> getJobsByVisaSponsorship(boolean visaSponsorship);
+    List<JobPostResDTO> getJobsByVisaSponsorship(boolean visaSponsorship);
 
-    List<JobPost> getJobsByPostedAtAfter(Date postedAt);
+    List<JobPostResDTO> getJobsByPostedAtAfter(Date postedAt);
 }

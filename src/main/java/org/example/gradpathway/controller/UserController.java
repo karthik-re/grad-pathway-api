@@ -1,5 +1,6 @@
 package org.example.gradpathway.controller;
 
+import jakarta.validation.Valid;
 import org.example.gradpathway.DTO.UserDataDTO;
 import org.example.gradpathway.service.UserDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,26 +19,42 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addUserData(@RequestBody UserDataDTO userDataDTO) {
-        userDataService.addUserData(userDataDTO);
-        return ResponseEntity.ok("User data added successfully");
+    public ResponseEntity<String> addUserData(@Valid @RequestBody UserDataDTO userDataDTO) {
+        try{
+            userDataService.addUserData(userDataDTO);
+            return ResponseEntity.ok("User data added successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateUserData(@RequestBody UserDataDTO userDataDTO, @PathVariable int id) {
-        userDataService.updateUserData(userDataDTO, id);
-        return ResponseEntity.ok("User data updated successfully");
+    public ResponseEntity<String> updateUserData(@Valid @RequestBody UserDataDTO userDataDTO, @PathVariable int id) {
+        try {
+            userDataService.updateUserData(userDataDTO, id);
+            return ResponseEntity.ok("User data updated successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUserData(@PathVariable int id) {
-        userDataService.deleteUserData(id);
-        return ResponseEntity.ok("User data deleted successfully");
+        try {
+            userDataService.getUserDataByUserId(id);
+            return ResponseEntity.ok("User data deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUserDataByUserId(@PathVariable int id) {
-        return ResponseEntity.ok(userDataService.getUserDataByUserId(id));
+        try{
+            return ResponseEntity.ok(userDataService.getUserDataByUserId(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 

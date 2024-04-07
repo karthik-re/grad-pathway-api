@@ -12,4 +12,6 @@ public interface CompanyRepository extends JpaRepository<Company, Integer> {
     List<Company> findAllByLocationLikeIgnoreCase(String location);
 
     List<Company> findAllBySizeLessThanEqual(int size);
+
+    boolean existsByName(String name);
 }

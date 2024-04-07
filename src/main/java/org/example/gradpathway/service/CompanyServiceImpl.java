@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CompanyServiceImpl implements CompanyService{
+public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
 
-    private final String BASE_PATH = "C:" + File.separator+"Users" + File.separator + "karth" +
+    private final String BASE_PATH = "C:" + File.separator + "Users" + File.separator + "karth" +
             File.separator + "Desktop" + File.separator + "FileSystemStorage" + File.separator;
 
 
@@ -26,10 +26,10 @@ public class CompanyServiceImpl implements CompanyService{
     public CompanyServiceImpl(CompanyRepository companyRepository) {
         this.companyRepository = companyRepository;
     }
+
     @Override
     public Company getCompanyById(int id) {
-        Optional<Company> company = companyRepository.findById(id);
-        return company.orElse(null);
+        return companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
     }
 
     @Override
@@ -48,20 +48,18 @@ public class CompanyServiceImpl implements CompanyService{
 
     @Override
     public void updateCompany(CompanyDTO companyDTO, int id) {
-        Optional<Company> company = companyRepository.findById(id);
-        if(company.isPresent()){
-            Company company1 = company.get();
-            company1.setName(companyDTO.getName());
-            company1.setLocation(companyDTO.getLocation());
-            company1.setUrl(companyDTO.getUrl());
-            company1.setDescription(companyDTO.getDescription());
-            company1.setSize(companyDTO.getSize());
-            companyRepository.save(company1);
-        }
+        Company company = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found") );
+            company.setName(companyDTO.getName());
+            company.setLocation(companyDTO.getLocation());
+            company.setUrl(companyDTO.getUrl());
+            company.setDescription(companyDTO.getDescription());
+            company.setSize(companyDTO.getSize());
+            companyRepository.save(company);
     }
 
     @Override
     public void deleteCompany(int id) {
+        companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
         companyRepository.deleteById(id);
     }
 
@@ -86,30 +84,32 @@ public class CompanyServiceImpl implements CompanyService{
     }
 
     @Override
-    public String uploadImage(MultipartFile img,int id) throws IOException {
+    public String uploadImage(MultipartFile img, int id) throws IOException {
+        Company company = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+
         String originalImageName = img.getOriginalFilename();
         String timeStamp = String.valueOf(System.currentTimeMillis());
-        String filePath = BASE_PATH+timeStamp+"_"+originalImageName;
+        String filePath = BASE_PATH + timeStamp + "_" + originalImageName;
 
         img.transferTo(new File(filePath));
 
-        Optional<Company> company = companyRepository.findById(id);
-        if(company.isPresent()){
-            Company company1 = company.get();
-            company1.setLogo(filePath);
-            companyRepository.save(company1);
-        }
+        company.setLogo(filePath);
+        companyRepository.save(company);
 
         return filePath;
     }
 
     @Override
     public byte[] getImage(int id) throws IOException {
-        Optional<Company> company = companyRepository.findById(id);
-        if(company.isEmpty()){
-            return null;
-        }
-        String path = company.get().getLogo();
+        Company company = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+        String path = company.getLogo();
         return Files.readAllBytes(new File(path).toPath());
     }
+
+    @Override
+    public boolean existsByName(String name) {
+        return companyRepository.existsByName(name);
+    }
+
+
 }
