@@ -1,6 +1,8 @@
 package org.example.gradpathway.service;
 
+import org.example.gradpathway.DTO.LoginDTO;
 import org.example.gradpathway.DTO.RegisterDTO;
+import org.example.gradpathway.DTO.UserDataDTO;
 import org.example.gradpathway.DTO.UserResDTO;
 import org.example.gradpathway.entity.Company;
 import org.example.gradpathway.entity.User;
@@ -8,6 +10,8 @@ import org.example.gradpathway.repository.CompanyRepository;
 import org.example.gradpathway.repository.UserRepository;
 import org.example.gradpathway.util.AuthenticationDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,8 +51,7 @@ public class UserServiceImpl implements UserService {
 
         if(user.getRole().equals("EMPLOYER")) {
             Company company = companyRepository.findById(registerDTO.getCompanyId())
-                    .orElseThrow(() -> new RuntimeException("Company not found"));
-
+                    .orElse(null);
             user.setCompany(company);
         }
 
@@ -84,6 +87,26 @@ public class UserServiceImpl implements UserService {
     public boolean userExists(String email) {
         return userRepository.existsByEmail(email);
     }
+
+    @Override
+    public void addCompanyToUser(int companyId) {
+        User user = authenticationDetails.getUser()
+                .orElseThrow(() -> new RuntimeException("Unauthorized"));
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+        user.setCompany(company);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void logout() {
+        try{
+            SecurityContextHolder.clearContext();
+        } catch (Exception e) {
+            throw new RuntimeException("Error logging out");
+        }
+    }
+
 
     private UserResDTO convertToUserResDTO(User user) {
         return UserResDTO.builder()

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+
 @RestController
 @RequestMapping("/api/userdata")
 public class UserController {
@@ -19,7 +21,7 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addUserData(@Valid @RequestBody UserDataDTO userDataDTO) {
+    public ResponseEntity<String> addUserData(@Valid @RequestBody UserDataDTO userDataDTO) throws ParseException {
         try{
             userDataService.addUserData(userDataDTO);
             return ResponseEntity.ok("User data added successfully");
@@ -29,7 +31,8 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateUserData(@Valid @RequestBody UserDataDTO userDataDTO, @PathVariable int id) {
+    public ResponseEntity<String> updateUserData(@Valid @RequestBody UserDataDTO userDataDTO
+            , @PathVariable int id) throws ParseException{
         try {
             userDataService.updateUserData(userDataDTO, id);
             return ResponseEntity.ok("User data updated successfully");
@@ -41,7 +44,7 @@ public class UserController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUserData(@PathVariable int id) {
         try {
-            userDataService.getUserDataByUserId(id);
+            userDataService.deleteUserData(id);
             return ResponseEntity.ok("User data deleted successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -56,7 +59,4 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
-
 }

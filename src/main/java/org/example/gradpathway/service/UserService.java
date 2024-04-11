@@ -1,5 +1,6 @@
 package org.example.gradpathway.service;
 
+import org.example.gradpathway.DTO.LoginDTO;
 import org.example.gradpathway.DTO.RegisterDTO;
 import org.example.gradpathway.DTO.UserDataDTO;
 import org.example.gradpathway.DTO.UserResDTO;
@@ -18,5 +19,9 @@ public interface UserService {
     void deleteUser(int id);
 
     boolean userExists(String email);
+
+    void addCompanyToUser(int companyId);
+
+    void logout();
 
 }

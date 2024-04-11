@@ -21,4 +21,5 @@ public class JobPostResDTO {
     private String userFirstName;
     private String userLastName;
     private Date postedAt;
+    private String url;
 }

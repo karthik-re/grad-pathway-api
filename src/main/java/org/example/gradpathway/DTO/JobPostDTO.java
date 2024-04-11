@@ -2,6 +2,7 @@ package org.example.gradpathway.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 
 @Data
 public class JobPostDTO {
@@ -20,10 +21,11 @@ public class JobPostDTO {
 
     private int experience;
 
+    @URL(message = "Invalid URL")
+    private String url;
+
     private int salary;
 
     private boolean visaSponsorship;
-
-    private int companyId;
 
 }

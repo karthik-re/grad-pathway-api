@@ -2,7 +2,9 @@ package org.example.gradpathway.service;
 
 import org.example.gradpathway.DTO.CompanyDTO;
 import org.example.gradpathway.entity.Company;
+import org.example.gradpathway.entity.User;
 import org.example.gradpathway.repository.CompanyRepository;
+import org.example.gradpathway.util.AuthenticationDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,12 +20,15 @@ public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
 
+    private final AuthenticationDetails authenticationDetails;
+
     private final String BASE_PATH = "C:" + File.separator + "Users" + File.separator + "karth" +
             File.separator + "Desktop" + File.separator + "FileSystemStorage" + File.separator;
 
 
     @Autowired
-    public CompanyServiceImpl(CompanyRepository companyRepository) {
+    public CompanyServiceImpl(CompanyRepository companyRepository,AuthenticationDetails authenticationDetails) {
+        this.authenticationDetails = authenticationDetails;
         this.companyRepository = companyRepository;
     }
 
@@ -48,7 +53,11 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void updateCompany(CompanyDTO companyDTO, int id) {
-        Company company = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found") );
+        Company company = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+        User user = authenticationDetails.getUser().orElseThrow(() -> new RuntimeException("Unauthorized access"));
+        if(user.getCompany().getId()!=id && !user.getRole().equals("ADMIN")){
+            throw new RuntimeException("Unauthorized access");
+        }
             company.setName(companyDTO.getName());
             company.setLocation(companyDTO.getLocation());
             company.setUrl(companyDTO.getUrl());
@@ -60,12 +69,16 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public void deleteCompany(int id) {
         companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+        User user = authenticationDetails.getUser().orElseThrow(() -> new RuntimeException("Unauthorized access"));
+        if(user.getCompany().getId()!=id && !user.getRole().equals("ADMIN")){
+            throw new RuntimeException("Unauthorized access");
+        }
         companyRepository.deleteById(id);
     }
 
     @Override
     public List<Company> getCompany(String name) {
-        return companyRepository.findAllByNameLikeIgnoreCase(name);
+        return companyRepository.findAllByNameLikeIgnoreCase("%" + name + "%");
     }
 
     @Override
@@ -86,6 +99,10 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public String uploadImage(MultipartFile img, int id) throws IOException {
         Company company = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+        User user = authenticationDetails.getUser().orElseThrow(() -> new RuntimeException("Unauthorized access"));
+        if(user.getCompany().getId()!=id && !user.getRole().equals("ADMIN")){
+            throw new RuntimeException("Unauthorized access");
+        }
 
         String originalImageName = img.getOriginalFilename();
         String timeStamp = String.valueOf(System.currentTimeMillis());

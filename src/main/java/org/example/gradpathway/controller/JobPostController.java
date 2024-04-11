@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -98,7 +99,8 @@ public class JobPostController {
     }
 
     @GetMapping("/job/date/{postedAt}")
-    public ResponseEntity<List<JobPostResDTO>> getJobsByPostedAtAfter(@PathVariable Date postedAt) {
+    public ResponseEntity<List<JobPostResDTO>> getJobsByPostedAtAfter(@PathVariable String postedAt)
+            throws ParseException {
         return ResponseEntity.ok(jobService.getJobsByPostedAtAfter(postedAt));
     }
 

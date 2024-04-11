@@ -11,6 +11,8 @@ import org.example.gradpathway.util.AuthenticationDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -35,14 +37,13 @@ public class JobServiceImpl implements JobService {
     @Override
     public void addJob(JobPostDTO jobDTO) {
 
-        Company company = companyRepository.findById(jobDTO.getCompanyId())
-                .orElseThrow(() -> new IllegalArgumentException("Company not found"));
-
         Optional<User> user = authenticationDetails.getUser();
 
-        if (company == null || user.isEmpty()) {
+        if (user.isEmpty()) {
             throw new IllegalArgumentException("Unauthorized");
         }
+        Company company = companyRepository.findById(user.get().getCompany().getId())
+                .orElseThrow(() -> new RuntimeException("No company associated with the user"));
 
         JobPost jobPost = JobPost.builder()
                 .id(0)
@@ -56,6 +57,7 @@ public class JobServiceImpl implements JobService {
                 .postedAt(new Date())
                 .company(company)
                 .user(user.get())
+                .url(jobDTO.getUrl())
                 .build();
         jobsRepository.save(jobPost);
     }
@@ -64,21 +66,32 @@ public class JobServiceImpl implements JobService {
     public void updateJob(JobPostDTO jobDTO, int id) {
         JobPost jobPost = jobsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
-        if (jobPost != null) {
-            jobPost.setTitle(jobDTO.getTitle());
-            jobPost.setDescription(jobDTO.getDescription());
-            jobPost.setLocation(jobDTO.getLocation());
-            jobPost.setType(jobDTO.getType());
-            jobPost.setExperience(jobDTO.getExperience());
-            jobPost.setSalary(jobDTO.getSalary());
-            jobPost.setVisaSponsorship(jobDTO.isVisaSponsorship());
-            jobsRepository.save(jobPost);
+        User user = authenticationDetails.getUser()
+                .orElseThrow(() -> new RuntimeException("Unauthorized"));
+
+        if (jobPost.getCompany().getId() != user.getCompany().getId() && !user.getRole().equals("ADMIN")) {
+            throw new RuntimeException("Unauthorized");
         }
+
+        jobPost.setTitle(jobDTO.getTitle());
+        jobPost.setDescription(jobDTO.getDescription());
+        jobPost.setLocation(jobDTO.getLocation());
+        jobPost.setType(jobDTO.getType());
+        jobPost.setExperience(jobDTO.getExperience());
+        jobPost.setSalary(jobDTO.getSalary());
+        jobPost.setVisaSponsorship(jobDTO.isVisaSponsorship());
+        jobPost.setUrl(jobDTO.getUrl());
+        jobsRepository.save(jobPost);
+
     }
 
     @Override
     public void deleteJob(int id) {
-        jobsRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+        JobPost jobPost = jobsRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+        User user = authenticationDetails.getUser().orElseThrow(() -> new RuntimeException("Unauthorized"));
+        if(jobPost.getCompany().getId() != user.getCompany().getId() && !user.getRole().equals("ADMIN")) {
+            throw new RuntimeException("Unauthorized");
+        }
         jobsRepository.deleteById(id);
     }
 
@@ -99,7 +112,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<JobPostResDTO> getJobsByTitle(String title) {
         return jobsRepository
-                .findAllByTitleLikeIgnoreCase(title)
+                .findAllByTitleLikeIgnoreCase("%" + title + "%")
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -107,7 +120,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobPostResDTO> getJobsByLocation(String location) {
-        return jobsRepository.findAllByLocationLikeIgnoreCase(location)
+        return jobsRepository.findAllByLocationLikeIgnoreCase("%" + location + "%")
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -115,7 +128,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobPostResDTO> getJobsByType(String type) {
-        return jobsRepository.findAllByTypeLikeIgnoreCase(type)
+        return jobsRepository.findAllByTypeLikeIgnoreCase("%" + type + "%")
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -146,8 +159,11 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobPostResDTO> getJobsByPostedAtAfter(Date postedAt) {
-        return jobsRepository.findAllByPostedAtAfter(postedAt)
+    public List<JobPostResDTO> getJobsByPostedAtAfter(String postedAt) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date postedAtDate = formatter.parse(postedAt);
+
+        return jobsRepository.findAllByPostedAtAfter(postedAtDate)
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -167,6 +183,7 @@ public class JobServiceImpl implements JobService {
                 .companyName(jobPost.getCompany().getName())
                 .userFirstName(jobPost.getUser().getFirstName())
                 .userLastName(jobPost.getUser().getLastName())
+                .url(jobPost.getUrl())
                 .build();
     }
 }
