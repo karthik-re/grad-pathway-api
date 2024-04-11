@@ -3,7 +3,6 @@ package org.example.gradpathway.controller;
 import jakarta.validation.Valid;
 import org.example.gradpathway.DTO.RegisterDTO;
 import org.example.gradpathway.DTO.UserResDTO;
-import org.example.gradpathway.entity.User;
 import org.example.gradpathway.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +52,15 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
 
+    @PostMapping("/addCompany/{companyId}")
+    public ResponseEntity<String> addCompanyToUser(@PathVariable int companyId) {
+        try {
+            userService.addCompanyToUser(companyId);
+            return ResponseEntity.ok("Company added to user");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

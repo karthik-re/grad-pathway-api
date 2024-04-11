@@ -38,6 +38,8 @@ public class JobPost {
 
     private String location;
 
+    private String url;
+
     private int experience;
 
     private int salary;

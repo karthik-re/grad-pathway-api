@@ -13,5 +13,5 @@ public class UserDataDTO {
 
     private int experience;
 
-    private Date dob;
+    private String dob;
 }
