@@ -5,12 +5,13 @@ import org.example.gradpathway.DTO.JobPostDTO;
 import org.example.gradpathway.DTO.JobPostResDTO;
 import org.example.gradpathway.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -54,7 +55,9 @@ public class JobPostController {
 
     @GetMapping("/all")
     public ResponseEntity<List<JobPostResDTO>> getAllJobs() {
-        return ResponseEntity.ok(jobService.getAllJobs());
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.MINUTES))
+                .body(jobService.getAllJobs());
     }
 
     @GetMapping("/job/{id}")

@@ -99,14 +99,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void logout() {
-        try{
-            SecurityContextHolder.clearContext();
-        } catch (Exception e) {
-            throw new RuntimeException("Error logging out");
-        }
+    public UserResDTO getMyData() {
+        User user = authenticationDetails.getUser()
+                .orElseThrow(() -> new RuntimeException("Unauthorized"));
+        return convertToUserResDTO(user);
     }
-
 
     private UserResDTO convertToUserResDTO(User user) {
         return UserResDTO.builder()
@@ -118,4 +115,6 @@ public class UserServiceImpl implements UserService {
                 .companyName(user.getCompany() != null ? user.getCompany().getName() : null)
                 .build();
     }
+
+
 }

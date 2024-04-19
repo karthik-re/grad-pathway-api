@@ -1,11 +1,15 @@
 package org.example.gradpathway.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.example.gradpathway.DTO.RegisterDTO;
 import org.example.gradpathway.DTO.UserResDTO;
 import org.example.gradpathway.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+
+    SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
 
     @Autowired
     public AuthController(UserService userService) {
@@ -63,4 +69,19 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getMyData() {
+        try{
+            return ResponseEntity.ok(userService.getMyData());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/login")
+    public ResponseEntity<String> login() {
+        return ResponseEntity.ok("Login Successful");
+    }
+//
 }
