@@ -22,6 +22,5 @@ public interface UserService {
 
     void addCompanyToUser(int companyId);
 
-    void logout();
-
+    UserResDTO getMyData();
 }
